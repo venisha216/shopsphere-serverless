@@ -37,26 +37,73 @@ const getCartFromService = (userId) => {
   });
 };
 
-// 🔹 Create Order
+// 🔹 Call Product Service
+const getProductsFromService = () => {
+  const url = process.env.PRODUCT_API_URL;
+
+  return new Promise((resolve, reject) => {
+    https.get(url, (res) => {
+      let data = "";
+
+      res.on("data", chunk => data += chunk);
+
+      res.on("end", () => {
+        try {
+          resolve(JSON.parse(data));
+        } catch (err) {
+          reject(err);
+        }
+      });
+    }).on("error", reject);
+  });
+};
+
+// 🔹 Clear Cart
+const clearCart = async (userId, items) => {
+  const baseUrl = process.env.CART_API_URL;
+
+  await Promise.all(
+    items.map(item =>
+      new Promise((resolve, reject) => {
+        https.request(
+          `${baseUrl}/${item}?userId=${userId}`,
+          { method: "DELETE" },
+          res => {
+            res.on("data", () => {});
+            res.on("end", resolve);
+          }
+        ).on("error", reject).end();
+      })
+    )
+  );
+};
+
+// 🔹 Create Order (UPDATED)
 const createOrder = async (body) => {
   const { userId, items } = body;
 
-  if (!userId || !items || items.length === 0) {
+  if (!userId) {
     return {
       statusCode: 400,
-      body: JSON.stringify({ message: "userId and items required" })
+      body: JSON.stringify({ message: "userId required" })
     };
   }
 
-  // 1️⃣ Get cart
+  // 1️⃣ Get latest cart
   const cartItems = await getCartFromService(userId);
 
-  if (!Array.isArray(cartItems)) {
-    throw new Error("Invalid cart response");
+  if (!Array.isArray(cartItems) || cartItems.length === 0) {
+    return {
+      statusCode: 400,
+      body: JSON.stringify({ message: "Cart is empty" })
+    };
   }
 
-  // 2️⃣ Validate
-  const invalidItems = items.filter(item => !cartItems.includes(item));
+  // 2️⃣ Decide items
+  const orderItems = items && items.length > 0 ? items : cartItems;
+
+  // 3️⃣ Validate
+  const invalidItems = orderItems.filter(item => !cartItems.includes(item));
 
   if (invalidItems.length > 0) {
     return {
@@ -68,11 +115,25 @@ const createOrder = async (body) => {
     };
   }
 
-  // 3️⃣ Create order
+  // 4️⃣ Get product data
+  const products = await getProductsFromService();
+
+  // 5️⃣ Calculate total
+  let totalAmount = 0;
+
+  orderItems.forEach(itemId => {
+    const product = products.find(p => p.id === itemId);
+    if (product) {
+      totalAmount += product.price;
+    }
+  });
+
+  // 6️⃣ Create order
   const newOrder = {
     orderId: Date.now().toString(),
     userId,
-    items
+    items: orderItems,
+    totalAmount
   };
 
   await dynamo.send(
@@ -82,6 +143,9 @@ const createOrder = async (body) => {
     })
   );
 
+  // 7️⃣ Clear cart
+  await clearCart(userId, orderItems);
+
   return {
     statusCode: 201,
     body: JSON.stringify(newOrder)
@@ -90,40 +154,23 @@ const createOrder = async (body) => {
 
 // 🔹 Get Orders
 const getOrders = async (userId) => {
-  try {
-    if (!userId) {
-      return {
-        statusCode: 400,
-        body: JSON.stringify({ message: "userId is required" })
-      };
-    }
-
-    const result = await dynamo.send(
-      new ScanCommand({ TableName: TABLE_NAME })
-    );
-
-    const items = result.Items || [];
-
-    const userOrders = items.filter(o => o.userId === userId);
-
-    console.log("Orders found:", userOrders);
-
+  if (!userId) {
     return {
-      statusCode: 200,
-      body: JSON.stringify(userOrders)
-    };
-
-  } catch (err) {
-    console.log("GET ORDERS ERROR:", err);
-
-    return {
-      statusCode: 500,
-      body: JSON.stringify({
-        message: "Failed to fetch orders",
-        error: err.message
-      })
+      statusCode: 400,
+      body: JSON.stringify({ message: "userId is required" })
     };
   }
+
+  const result = await dynamo.send(
+    new ScanCommand({ TableName: TABLE_NAME })
+  );
+
+  const userOrders = (result.Items || []).filter(o => o.userId === userId);
+
+  return {
+    statusCode: 200,
+    body: JSON.stringify(userOrders)
+  };
 };
 
 // 🔹 Delete Order
@@ -144,7 +191,7 @@ const deleteOrder = async (orderId) => {
 
   return {
     statusCode: 200,
-    body: JSON.stringify({
+      body: JSON.stringify({
       message: "Order deleted",
       orderId
     })

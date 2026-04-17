@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import Toast from "../components/Toast";
 
 const BASE_URL = "https://kammj2qk94.execute-api.ap-southeast-1.amazonaws.com";
 const userId = "user1";
@@ -6,6 +7,7 @@ const userId = "user1";
 export default function Orders() {
   const [orders, setOrders] = useState([]);
   const [products, setProducts] = useState([]);
+  const [toast, setToast] = useState(null);
 
   useEffect(() => {
     loadOrders();
@@ -29,6 +31,7 @@ export default function Orders() {
       method: "DELETE"
     });
 
+    setToast({ message: "Order cancelled", type: "error" });
     loadOrders();
   };
 
@@ -60,9 +63,15 @@ export default function Orders() {
               >
                 Cancel Order
               </button>
+
+              <p className="order-total">Total: ₹{order.totalAmount}</p>
             </div>
           ))}
         </div>
+      )}
+
+      {toast && (
+        <Toast {...toast} onClose={() => setToast(null)} />
       )}
     </div>
   );

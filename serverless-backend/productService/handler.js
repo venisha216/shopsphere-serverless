@@ -62,6 +62,15 @@ exports.handler = async (event) => {
 
       case "DELETE /products/{id}":
         return addCors(await deleteProduct(event.pathParameters?.id));
+      
+      case "GET /health":
+        return {
+          statusCode: 200,
+          body: JSON.stringify({
+            status: "ok",
+            service: "product"
+          })
+        };
 
       default:
         return addCors({

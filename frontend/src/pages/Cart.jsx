@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import Toast from "../components/Toast";
 
 const BASE_URL = "https://kammj2qk94.execute-api.ap-southeast-1.amazonaws.com";
 const userId = "user1";
@@ -6,6 +7,7 @@ const userId = "user1";
 export default function Cart() {
   const [cart, setCart] = useState([]);
   const [products, setProducts] = useState([]);
+  const [toast, setToast] = useState(null);
 
   useEffect(() => {
     loadCart();
@@ -29,14 +31,44 @@ export default function Cart() {
       method: "DELETE"
     });
 
+    setToast({ message: "Item removed", type: "error" });
     loadCart();
   };
+
+  const orderSingle = async (productId) => {
+    await fetch(`${BASE_URL}/orders`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ userId, items: [productId] })
+    });
+
+    setToast({ message: "Order placed", type: "success" });
+  };
+
+  const orderAll = async () => {
+  await fetch(`${BASE_URL}/orders`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({
+      userId   // ✅ ONLY THIS
+    })
+  });
+
+  setToast({ message: "Order placed", type: "success" });
+  loadCart();
+};
 
   const cartItems = products.filter(p => cart.includes(p.id));
 
   return (
     <div className="container">
       <h2>Your Cart</h2>
+
+      {cartItems.length > 0 && (
+        <button className="primary" onClick={orderAll}>
+          Order All
+        </button>
+      )}
 
       {cartItems.length === 0 ? (
         <p className="empty">Cart is empty</p>
@@ -47,15 +79,25 @@ export default function Cart() {
               <h3>{item.name}</h3>
               <p className="price">₹{item.price}</p>
 
-              <button
-                className="danger"
-                onClick={() => removeItem(item.id)}
-              >
-                Remove
-              </button>
+              <div className="actions">
+                <button onClick={() => orderSingle(item.id)}>
+                  Order
+                </button>
+
+                <button
+                  className="danger"
+                  onClick={() => removeItem(item.id)}
+                >
+                  Remove
+                </button>
+              </div>
             </div>
           ))}
         </div>
+      )}
+
+      {toast && (
+        <Toast {...toast} onClose={() => setToast(null)} />
       )}
     </div>
   );
