@@ -1,42 +1,158 @@
-# ShopSphere - Serverless Full Stack Application
+# ShopSphere - Serverless E-Commerce Application
 
 ## Overview
 
-ShopSphere is a serverless full stack e-commerce application built using AWS services and deployed using Infrastructure as Code (Terraform). It demonstrates a scalable architecture with microservices for product, cart, and order management.
+ShopSphere is a full-stack serverless e-commerce application built using AWS cloud services and deployed with Terraform. It follows a microservices-based architecture with independent services for products, cart, and orders.
+
+The application demonstrates scalable backend design, modern frontend development, and real-world cloud deployment practices including CDN distribution and infrastructure as code.
+
+
+## Tech Stack
+
+### Frontend
+
+* React (Vite)
+* Custom CSS (responsive UI)
+
+### Backend
+
+* Node.js (AWS Lambda)
+* REST APIs via API Gateway (HTTP API)
+
+### Cloud & Infrastructure
+
+* Amazon S3 (static hosting)
+* Amazon CloudFront (CDN)
+* Amazon DynamoDB (NoSQL database)
+* AWS Lambda
+* Terraform (Infrastructure as Code)
 
 ---
 
-## Architecture
+## Architecture Flow (High-Level)
 
-- Frontend: React (Vite)
-- Backend: AWS Lambda (Node.js)
-- API Layer: Amazon API Gateway (HTTP API)
-- Database: Amazon DynamoDB
-- Hosting: Amazon S3 (static website hosting)
-- CDN: Amazon CloudFront
-- Infrastructure: Terraform
-
----
+User (Browser)
+      ↓
+CloudFront (CDN)
+      ↓
+S3 (Frontend - React App)
+      ↓
+API Gateway (HTTP API)
+      ↓
+Lambda Functions (Product / Cart / Order)
+      ↓
+DynamoDB (Database)
 
 ## Features
 
 ### Product Service
-- Get all products
-- Get product by ID
-- Create product
-- Update product
-- Delete product
+
+* View all products
+* Search products by name
+* Filter by category and price
+* Add/update/delete products
+* Product images support
 
 ### Cart Service
-- Add item to cart
-- View cart
-- Remove item from cart
+
+* Add item to cart
+* View cart items
+* Remove item from cart
 
 ### Order Service
-- Create order
-- Get orders by user
-- Cancel order
+
+* Create order (single item or full cart)
+* Calculate total order amount
+* Fetch user orders
+* Cancel orders
+* Automatically clear cart after ordering
+
+### Frontend Features
+
+* Product cards with images
+* Search functionality
+* Filters (category + price)
+* Toast notifications
+* Separate pages (Products, Cart, Orders)
+* Responsive grid UI
 
 ---
 
 ## Project Structure
+
+Week1_terraform/
+│
+├── frontend/                   
+│   ├── src/
+│   ├── dist/
+│   └── deploy.ps1
+│
+├── serverless-backend/
+│   ├── productService/
+│   ├── cartService/
+│   ├── orderService/
+│   └── terraform/
+│
+├── .gitignore
+└── README.md
+
+---
+
+## Deployment
+
+### Backend (Terraform)
+cd serverless-backend/terraform
+terraform init
+terraform apply
+
+---
+
+### Frontend Build
+cd frontend
+npm install
+npm run build
+
+---
+
+### Frontend Deployment
+.\deploy.ps1
+
+This script:
+
+* Builds the frontend
+* Uploads files to S3
+* Invalidates CloudFront cache
+
+---
+
+## Key Learnings
+
+* Serverless architecture design
+* Microservices using Lambda + API Gateway
+* DynamoDB schema-less modeling
+* Terraform modular infrastructure
+* CloudFront caching and invalidation
+* Full-stack cloud deployment
+
+---
+
+## Future Improvements
+
+* Authentication using AWS Cognito
+* Image upload via S3
+* Backend-based search & filtering
+* Pagination support
+* CI/CD pipeline
+
+---
+
+## Author
+
+Venisha M
+B.Tech IT Student
+
+---
+
+## License
+
+This project is for educational purposes.
