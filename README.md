@@ -8,13 +8,6 @@ The application demonstrates scalable backend design, modern frontend developmen
 
 ---
 
-## Live Demo
-
-* Frontend (CloudFront): *[Add your CloudFront URL here]*
-* API Gateway Base URL: *[Add your API URL here]*
-
----
-
 ## Tech Stack
 
 ### Frontend
@@ -51,15 +44,6 @@ API Gateway (HTTP API)
 Lambda Functions (Product / Cart / Order)
       ↓
 DynamoDB (Database)
-```
-
-### Service Communication Flow
-
-```id="flow2"
-Order Service → calls → Cart Service (to validate items)
-Order Service → calls → Product Service (to calculate total)
-Order Service → updates → DynamoDB
-Order Service → clears → Cart Service
 ```
 
 ---
@@ -114,14 +98,6 @@ Week1_terraform/
 │   ├── cartService/
 │   ├── orderService/
 │   └── terraform/
-│       ├── provider.tf
-│       ├── lambda.tf
-│       ├── api.tf
-│       ├── dynamodb.tf
-│       ├── s3.tf
-│       ├── cloudfront.tf
-│       ├── variables.tf
-│       └── outputs.tf
 │
 ├── .gitignore
 └── README.md
@@ -162,15 +138,6 @@ This script:
 * Builds the frontend
 * Uploads files to S3
 * Invalidates CloudFront cache
-
----
-
-## Environment Variables
-
-Configured in Terraform for Lambda:
-
-* `CART_API_URL`
-* `PRODUCT_API_URL`
 
 ---
 
