@@ -6,6 +6,14 @@ ShopSphere is a full-stack serverless e-commerce application built using AWS clo
 
 The application demonstrates scalable backend design, modern frontend development, and real-world cloud deployment practices including CDN distribution and infrastructure as code.
 
+---
+
+## Live Demo
+
+* Frontend (CloudFront): *[Add your CloudFront URL here]*
+* API Gateway Base URL: *[Add your API URL here]*
+
+---
 
 ## Tech Stack
 
@@ -31,6 +39,7 @@ The application demonstrates scalable backend design, modern frontend developmen
 
 ## Architecture Flow (High-Level)
 
+```id="flow1"
 User (Browser)
       ↓
 CloudFront (CDN)
@@ -42,6 +51,18 @@ API Gateway (HTTP API)
 Lambda Functions (Product / Cart / Order)
       ↓
 DynamoDB (Database)
+```
+
+### Service Communication Flow
+
+```id="flow2"
+Order Service → calls → Cart Service (to validate items)
+Order Service → calls → Product Service (to calculate total)
+Order Service → updates → DynamoDB
+Order Service → clears → Cart Service
+```
+
+---
 
 ## Features
 
@@ -80,9 +101,10 @@ DynamoDB (Database)
 
 ## Project Structure
 
+```id="struct1"
 Week1_terraform/
 │
-├── frontend/                   
+├── frontend/                     # React application
 │   ├── src/
 │   ├── dist/
 │   └── deploy.ps1
@@ -92,36 +114,63 @@ Week1_terraform/
 │   ├── cartService/
 │   ├── orderService/
 │   └── terraform/
+│       ├── provider.tf
+│       ├── lambda.tf
+│       ├── api.tf
+│       ├── dynamodb.tf
+│       ├── s3.tf
+│       ├── cloudfront.tf
+│       ├── variables.tf
+│       └── outputs.tf
 │
 ├── .gitignore
 └── README.md
+```
 
 ---
 
 ## Deployment
 
 ### Backend (Terraform)
+
+```id="dep1"
 cd serverless-backend/terraform
 terraform init
 terraform apply
+```
 
 ---
 
 ### Frontend Build
+
+```id="dep2"
 cd frontend
 npm install
 npm run build
+```
 
 ---
 
 ### Frontend Deployment
+
+```id="dep3"
 .\deploy.ps1
+```
 
 This script:
 
 * Builds the frontend
 * Uploads files to S3
 * Invalidates CloudFront cache
+
+---
+
+## Environment Variables
+
+Configured in Terraform for Lambda:
+
+* `CART_API_URL`
+* `PRODUCT_API_URL`
 
 ---
 
@@ -132,6 +181,7 @@ This script:
 * DynamoDB schema-less modeling
 * Terraform modular infrastructure
 * CloudFront caching and invalidation
+* Handling CORS in distributed systems
 * Full-stack cloud deployment
 
 ---
