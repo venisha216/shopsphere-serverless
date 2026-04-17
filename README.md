@@ -32,7 +32,7 @@ The application demonstrates scalable backend design, modern frontend developmen
 
 ## Architecture Flow (High-Level)
 
-```id="flow1"
+```text
 User (Browser)
       ↓
 CloudFront (CDN)
@@ -85,7 +85,7 @@ DynamoDB (Database)
 
 ## Project Structure
 
-```id="struct1"
+```text
 Week1_terraform/
 │
 ├── frontend/                     # React application
@@ -109,7 +109,7 @@ Week1_terraform/
 
 ### Backend (Terraform)
 
-```id="dep1"
+```bash
 cd serverless-backend/terraform
 terraform init
 terraform apply
@@ -119,7 +119,7 @@ terraform apply
 
 ### Frontend Build
 
-```id="dep2"
+```bash
 cd frontend
 npm install
 npm run build
@@ -129,7 +129,7 @@ npm run build
 
 ### Frontend Deployment
 
-```id="dep3"
+```bash
 .\deploy.ps1
 ```
 
